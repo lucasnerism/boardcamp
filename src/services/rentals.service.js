@@ -15,7 +15,7 @@ const findRentals = async () => {
         gameId: rent.gameId,
         rentDate: dayjs(rent.rentDate).format("YYYY-MM-DD"),
         daysRented: rent.daysRented,
-        returnDate: rent.returnDate,
+        returnDate: rent.returnDate ? dayjs(rent.renturnDate).format("YYYY-MM-DD") : rent.returnDate,
         originalPrice: rent.originalPrice,
         delayFee: rent.delayFee,
         customer: { id: rent.idFromCustomer, name: rent.customerName },
@@ -51,13 +51,32 @@ const insertNewRental = async ({ customerId, gameId, daysRented }) => {
 };
 
 const endRental = async (id) => {
+  try {
+    const rental = (await db.query(`SELECT * FROM rentals WHERE id = $1;`, [id])).rows[0];
+    console.log(rental);
+    if (!rental) return { status: 404, message: "Esse aluguel não existe" };
+    if (rental.returnDate) return { status: 400, message: "Esse aluguel já foi finalizado" };
 
+    const returnDate = dayjs();
+    const rentDate = dayjs(rental.rentDate);
+    let delayFee = null;
+    const daysDiff = returnDate.diff(rentDate, 'day');
+    console.log(daysDiff);
+    if (daysDiff > rental.daysRented) {
+      delayFee = daysDiff * (rental.originalPrice / rental.daysRented);
+    }
+    await db.query(`UPDATE rentals SET "returnDate"=$1,"delayFee"=$2 WHERE id = $3`, [returnDate.format("YYYY-MM-DD"), delayFee, id]);
+
+    return { status: 200, message: "Aluguel finalizado com sucesso" };
+  } catch (error) {
+    return { status: 500, message: "Erro de servidor" };
+  }
 };
 
 const deleteRental = async (id) => {
   try {
     const rental = (await db.query(`SELECT * FROM rentals WHERE id = $1;`, [id])).rows[0];
-    if (!rental) return { status: 400, message: "Esse aluguel não existe" };
+    if (!rental) return { status: 404, message: "Esse aluguel não existe" };
 
     await db.query('DELETE FROM rentals WHERE id=$1', [id]);
     return { status: 200, message: "Aluguel deletado com sucesso" };
