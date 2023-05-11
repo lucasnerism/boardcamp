@@ -34,7 +34,7 @@ const editCustomer = async (id, { name, phone, cpf, birthday }) => {
   try {
     const customer = (await db.query(`SELECT * FROM customers WHERE cpf = $1 AND id <> $2 ;`, [cpf, id])).rows[0];
     if (customer) return { status: 409, message: "Esse CPF já foi cadastrado" };
-    await db.query(`UPDATE customers SET name = $1, phone = $2, cpf = $3, birthday = $4 WHERE id = $5`,
+    await db.query(`UPDATE customers SET name = $1, phone = $2, cpf = $3, birthday = $4 WHERE id = $5;`,
       [name, phone, cpf, birthday, id]);
     return ({ status: 200, message: "Cliente atualizado com sucesso" });
   } catch (error) {
