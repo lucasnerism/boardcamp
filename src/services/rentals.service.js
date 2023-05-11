@@ -36,8 +36,8 @@ const insertNewRental = async ({ customerId, gameId, daysRented }) => {
     const customer = (await db.query(`SELECT * FROM customers WHERE id = $1;`, [customerId])).rows[0];
     if (!customer) return { status: 400, message: "Esse cliente não existe" };
 
-    const gameRentals = (await db.query(`SELECT * FROM rentals WHERE "gameId"=$1;`, [gameId])).rows;
-    if (game.stockTotal - gameRentals.length === 0) return { status: 400, message: "Esse jogo não está disponível no momento" };
+    const gameRentals = (await db.query(`SELECT * FROM rentals WHERE "gameId"=$1 AND "returnDate" IS NULL;`, [gameId])).rows;
+    if (game.stockTotal - gameRentals.length <= 0) return { status: 400, message: "Esse jogo não está disponível no momento" };
 
     const rentDate = dayjs().format("YYYY-MM-DD");
     const originalPrice = daysRented * game.pricePerDay;
@@ -55,7 +55,15 @@ const endRental = async (id) => {
 };
 
 const deleteRental = async (id) => {
+  try {
+    const rental = (await db.query(`SELECT * FROM rentals WHERE id = $1;`, [id])).rows[0];
+    if (!rental) return { status: 400, message: "Esse aluguel não existe" };
 
+    await db.query('DELETE FROM rentals WHERE id=$1', [id]);
+    return { status: 200, message: "Aluguel deletado com sucesso" };
+  } catch (error) {
+    return { status: 500, message: "Erro de servidor" };
+  }
 };
 
 export default {
