@@ -63,7 +63,7 @@ const endRental = async (id) => {
     const daysDiff = returnDate.diff(rentDate, 'day');
     console.log(daysDiff);
     if (daysDiff > rental.daysRented) {
-      delayFee = daysDiff * (rental.originalPrice / rental.daysRented);
+      delayFee = (daysDiff - rental.daysRented) * (rental.originalPrice / rental.daysRented);
     }
     await db.query(`UPDATE rentals SET "returnDate"=$1,"delayFee"=$2 WHERE id = $3`, [returnDate.format("YYYY-MM-DD"), delayFee, id]);
 
@@ -77,6 +77,7 @@ const deleteRental = async (id) => {
   try {
     const rental = (await db.query(`SELECT * FROM rentals WHERE id = $1;`, [id])).rows[0];
     if (!rental) return { status: 404, message: "Esse aluguel não existe" };
+    if (!rental.returnDate) return { status: 400, message: "Esse aluguel ainda não foi finalizado" };
 
     await db.query('DELETE FROM rentals WHERE id=$1', [id]);
     return { status: 200, message: "Aluguel deletado com sucesso" };
