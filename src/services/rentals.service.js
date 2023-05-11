@@ -9,15 +9,19 @@ const findRentals = async () => {
     JOIN games ON rentals."gameId"=games.id;
     `)).rows;
     const rentals = originalRentals.map(rent => (
-      { ...rent, customer: { id: rent.idFromCustomer, name: rent.customerName }, game: { id: rent.idFromGame, name: rent.gameName } }
+      {
+        id: rent.id,
+        customerId: rent.customerId,
+        gameId: rent.gameId,
+        rentDate: dayjs(rent.rentDate).format("YYYY-MM-DD"),
+        daysRented: rent.daysRented,
+        returnDate: rent.returnDate,
+        originalPrice: rent.originalPrice,
+        delayFee: rent.delayFee,
+        customer: { id: rent.idFromCustomer, name: rent.customerName },
+        game: { id: rent.idFromGame, name: rent.gameName }
+      }
     ));
-    rentals.forEach(rent => {
-      delete rent.idFromCustomer;
-      delete rent.customerName;
-      delete rent.idFromGame;
-      delete rent.gameName;
-    });
-
     return { status: 200, rentals };
   } catch (error) {
     return { status: 500, rentals: { message: "Erro de servidor" } };
@@ -31,6 +35,9 @@ const insertNewRental = async ({ customerId, gameId, daysRented }) => {
 
     const customer = (await db.query(`SELECT * FROM customers WHERE id = $1;`, [customerId])).rows[0];
     if (!customer) return { status: 400, message: "Esse cliente não existe" };
+
+    const gameRentals = (await db.query(`SELECT * FROM rentals WHERE "gameId"=$1;`, [gameId])).rows;
+    if (game.stockTotal - gameRentals.length === 0) return { status: 400, message: "Esse jogo não está disponível no momento" };
 
     const rentDate = dayjs().format("YYYY-MM-DD");
     const originalPrice = daysRented * game.pricePerDay;
