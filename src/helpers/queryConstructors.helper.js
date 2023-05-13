@@ -35,25 +35,29 @@ export const rentalsQueryConstructor = (queryString) => {
     ON rentals."gameId"=games.id
   `;
   let { query, dependencyArray } = queryConstructor(initialQuery, queryString);
+  let whereUsed = false;
 
   if (customerId) {
     dependencyArray.push(customerId);
-    query += ` WHERE "customerId" LIKE $${dependencyArray.length}`;
+    query += ` WHERE "customerId"=$${dependencyArray.length}`;
+    whereUsed = true;
   }
   if (gameId) {
     dependencyArray.push(gameId);
-    query += ` WHERE "gameId" LIKE $${dependencyArray.length}`;
+    query += whereUsed ? ` AND "gameId"=$${dependencyArray.length}` : ` WHERE "gameId"=$${dependencyArray.length}`;
+    whereUsed = true;
   }
   if (status === "open") {
-    customerId || gameId ? query += ` AND "returnDate" IS NULL` : query += ` WHERE "returnDate" IS NULL`;
+    query += whereUsed ? ` AND "returnDate" IS NULL` : ` WHERE "returnDate" IS NULL`;
+    whereUsed = true;
   }
   if (status === "closed") {
-    customerId || gameId ? query += ` AND "returnDate" IS NOT NULL` : query += ` WHERE "returnDate" IS NOT NULL`;
+    query += whereUsed ? ` AND "returnDate" IS NOT NULL` : ` WHERE "returnDate" IS NOT NULL`;
+    whereUsed = true;
   }
   if (startDate) {
     dependencyArray.push(startDate);
-    customerId || gameId || status === ("open" || "closed") ? query +=
-      ` AND "rentDate" >=$${dependencyArray.length}` : query += ` WHERE "rentDate" >=$${dependencyArray.length}`;
+    query += whereUsed ? ` AND "rentDate" >=$${dependencyArray.length}` : ` WHERE "rentDate" >=$${dependencyArray.length}`;
   }
   query += `;`;
   return { text: query, values: dependencyArray };
