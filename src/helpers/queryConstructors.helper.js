@@ -1,3 +1,5 @@
+import { isTableName } from "./checkTableName.helper.js";
+
 export const queryConstructor = (initialQuery, queryString) => {
   const { offset, limit, order, desc } = { ...queryString };
 
@@ -12,7 +14,7 @@ export const queryConstructor = (initialQuery, queryString) => {
     dependencyArray.push(limit);
     query += ` LIMIT $${dependencyArray.length}`;
   }
-  if (order) {
+  if (order && isTableName(order)) {
     query += ` ORDER BY "${order}"`;
     if (desc === "true") {
       query += ` DESC`;
