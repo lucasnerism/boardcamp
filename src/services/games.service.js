@@ -1,9 +1,8 @@
 import db from "../database/connect.js";
-import queryConstructor from "../helpers/queryConstructor.helper.js";
+import { gamesQueryConstructor } from "../helpers/queryConstructors.helper.js";
 
 const findAllGames = async (queryString) => {
-  const initialQuery = `SELECT * FROM games`;
-  const query = queryConstructor(initialQuery, queryString);
+  const query = gamesQueryConstructor(queryString);
 
   try {
     const games = (await db.query(query)).rows;

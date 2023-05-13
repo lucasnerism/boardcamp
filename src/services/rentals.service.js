@@ -1,17 +1,9 @@
 import db from "../database/connect.js";
 import dayjs from "dayjs";
-import queryConstructor from "../helpers/queryConstructor.helper.js";
+import { rentalsQueryConstructor } from "../helpers/queryConstructors.helper.js";
 
 const findRentals = async (queryString) => {
-  const initialQuery = `
-  SELECT rentals.*, customers.name AS "customerName", games.name AS "gameName"
-  FROM rentals
-  JOIN customers
-    ON rentals."customerId"=customers.id
-  JOIN games
-    ON rentals."gameId"=games.id
-  `;
-  const query = queryConstructor(initialQuery, queryString);
+  const query = rentalsQueryConstructor(queryString);
 
   try {
     const originalRentals = (await db.query(query)).rows;
