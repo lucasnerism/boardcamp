@@ -1,8 +1,12 @@
 import db from "../database/connect.js";
+import queryConstructor from "../helpers/queryConstructor.helper.js";
 
-const findAllGames = async () => {
+const findAllGames = async (queryString) => {
+  const initialQuery = `SELECT * FROM games`;
+  const query = queryConstructor(initialQuery, queryString);
+
   try {
-    const games = (await db.query("SELECT * FROM games;")).rows;
+    const games = (await db.query(query)).rows;
     return { status: 200, games };
   } catch (error) {
     return { status: 500, games: { message: "Erro de servidor" } };

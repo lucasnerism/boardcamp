@@ -1,13 +1,20 @@
-import dayjs from "dayjs";
 import db from "../database/connect.js";
+import dayjs from "dayjs";
+import queryConstructor from "../helpers/queryConstructor.helper.js";
 
-const findRentals = async () => {
+const findRentals = async (queryString) => {
+  const initialQuery = `
+  SELECT rentals.*, customers.name AS "customerName", games.name AS "gameName"
+  FROM rentals
+  JOIN customers
+    ON rentals."customerId"=customers.id
+  JOIN games
+    ON rentals."gameId"=games.id
+  `;
+  const query = queryConstructor(initialQuery, queryString);
+
   try {
-    const originalRentals = (await db.query(`SELECT rentals.*, customers.id AS "idFromCustomer" , customers.name AS "customerName", games.id AS "idFromGame", games.name AS "gameName"
-    FROM rentals
-    JOIN customers ON rentals."customerId"=customers.id
-    JOIN games ON rentals."gameId"=games.id;
-    `)).rows;
+    const originalRentals = (await db.query(query)).rows;
     const rentals = originalRentals.map(rent => (
       {
         id: rent.id,
@@ -18,8 +25,8 @@ const findRentals = async () => {
         returnDate: rent.returnDate ? dayjs(rent.renturnDate).format("YYYY-MM-DD") : rent.returnDate,
         originalPrice: rent.originalPrice,
         delayFee: rent.delayFee,
-        customer: { id: rent.idFromCustomer, name: rent.customerName },
-        game: { id: rent.idFromGame, name: rent.gameName }
+        customer: { id: rent.customerId, name: rent.customerName },
+        game: { id: rent.gameId, name: rent.gameName }
       }
     ));
     return { status: 200, rentals };
@@ -53,7 +60,6 @@ const insertNewRental = async ({ customerId, gameId, daysRented }) => {
 const endRental = async (id) => {
   try {
     const rental = (await db.query(`SELECT * FROM rentals WHERE id = $1;`, [id])).rows[0];
-    console.log(rental);
     if (!rental) return { status: 404, message: "Esse aluguel não existe" };
     if (rental.returnDate) return { status: 400, message: "Esse aluguel já foi finalizado" };
 
@@ -61,7 +67,6 @@ const endRental = async (id) => {
     const rentDate = dayjs(rental.rentDate);
     let delayFee = null;
     const daysDiff = returnDate.diff(rentDate, 'day');
-    console.log(daysDiff);
     if (daysDiff > rental.daysRented) {
       delayFee = (daysDiff - rental.daysRented) * (rental.originalPrice / rental.daysRented);
     }

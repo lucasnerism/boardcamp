@@ -1,7 +1,7 @@
 import rentalsService from "../services/rentals.service.js";
 
 const getRentals = async (req, res) => {
-  const { status, rentals } = await rentalsService.findRentals();
+  const { status, rentals } = await rentalsService.findRentals(req.query);
   res.status(status).json(rentals);
 };
 

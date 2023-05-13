@@ -1,7 +1,7 @@
 import customersService from "../services/customers.service.js";
 
 const getCustomers = async (req, res) => {
-  const { status, customers } = await customersService.findAllCustomers();
+  const { status, customers } = await customersService.findAllCustomers(req.query);
   res.status(status).json(customers);
 };
 

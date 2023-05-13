@@ -1,7 +1,7 @@
 import gamesService from "../services/games.service.js";
 
 const getAllGames = async (req, res) => {
-  const { status, games } = await gamesService.findAllGames();
+  const { status, games } = await gamesService.findAllGames(req.query);
   res.status(status).json(games);
 };
 
