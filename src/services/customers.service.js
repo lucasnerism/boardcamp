@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import db from "../database/connect.js";
 import { customersQueryConstructor } from "../helpers/queryConstructors.helper.js";
 
@@ -7,9 +6,6 @@ const findAllCustomers = async (queryString) => {
 
   try {
     const customers = (await db.query(query)).rows;
-    customers.forEach(customer => (
-      customer.birthday = dayjs(customer.birthday).format("YYYY-MM-DD")
-    ));
     return { status: 200, customers };
   } catch (error) {
     return { status: 500, customers: { message: "Erro de servidor" } };
@@ -18,9 +14,8 @@ const findAllCustomers = async (queryString) => {
 
 const findCustomerById = async (id) => {
   try {
-    const customer = (await db.query(`SELECT * FROM customers WHERE id = $1;`, [id])).rows[0];
+    const customer = (await db.query(`SELECT name,phone,cpf, TO_CHAR(birthday,'YYYY-MM-DD') birthday FROM customers WHERE id = $1;`, [id])).rows[0];
     if (!customer) return { status: 404, message: "Esse cliente não existe" };
-    customer.birthday = dayjs(customer.birthday).format("YYYY-MM-DD");
     return { status: 200, customer };
   } catch (error) {
     return { status: 500, customer: { message: "Erro de servidor" } };
