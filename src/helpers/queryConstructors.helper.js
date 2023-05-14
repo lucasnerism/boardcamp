@@ -77,7 +77,7 @@ export const gamesQueryConstructor = (queryString) => {
 
 export const customersQueryConstructor = (queryString) => {
   const { cpf } = { ...queryString };
-  const initialQuery = `SELECT name,phone,cpf, TO_CHAR(birthday,'YYYY-MM-DD') birthday FROM customers`;
+  const initialQuery = `SELECT id,name,phone,cpf, TO_CHAR(birthday,'YYYY-MM-DD') birthday FROM customers`;
   let { query, dependencyArray } = queryConstructor(initialQuery, queryString);
   if (cpf) {
     dependencyArray.push(cpf);

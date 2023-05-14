@@ -14,7 +14,7 @@ const findAllCustomers = async (queryString) => {
 
 const findCustomerById = async (id) => {
   try {
-    const customer = (await db.query(`SELECT name,phone,cpf, TO_CHAR(birthday,'YYYY-MM-DD') birthday FROM customers WHERE id = $1;`, [id])).rows[0];
+    const customer = (await db.query(`SELECT id,name,phone,cpf, TO_CHAR(birthday,'YYYY-MM-DD') birthday FROM customers WHERE id = $1;`, [id])).rows[0];
     if (!customer) return { status: 404, message: "Esse cliente não existe" };
     return { status: 200, customer };
   } catch (error) {
