@@ -23,7 +23,7 @@ const findRentals = async (queryString) => {
     ));
     return { status: 200, rentals };
   } catch (error) {
-    return { status: 500, rentals: { message: "Erro de servidor" } };
+    return { status: 500, rentals: { message: error.message } };
   }
 };
 
@@ -45,7 +45,7 @@ const insertNewRental = async ({ customerId, gameId, daysRented }) => {
     `, [customerId, gameId, rentDate, daysRented, originalPrice]);
     return { status: 201, message: "Aluguel registrado com sucesso" };
   } catch (error) {
-    return { status: 500, message: "Erro de servidor" };
+    return { status: 500, message: error.message };
   }
 };
 
@@ -66,7 +66,7 @@ const endRental = async (id) => {
 
     return { status: 200, message: "Aluguel finalizado com sucesso" };
   } catch (error) {
-    return { status: 500, message: "Erro de servidor" };
+    return { status: 500, message: error.message };
   }
 };
 
@@ -79,7 +79,7 @@ const deleteRental = async (id) => {
     await db.query('DELETE FROM rentals WHERE id=$1', [id]);
     return { status: 200, message: "Aluguel deletado com sucesso" };
   } catch (error) {
-    return { status: 500, message: "Erro de servidor" };
+    return { status: 500, message: error.message };
   }
 };
 

@@ -8,7 +8,7 @@ const findAllCustomers = async (queryString) => {
     const customers = (await db.query(query)).rows;
     return { status: 200, customers };
   } catch (error) {
-    return { status: 500, customers: { message: "Erro de servidor" } };
+    return { status: 500, customers: { message: error.message } };
   }
 };
 
@@ -18,7 +18,7 @@ const findCustomerById = async (id) => {
     if (!customer) return { status: 404, message: "Esse cliente não existe" };
     return { status: 200, customer };
   } catch (error) {
-    return { status: 500, customer: { message: "Erro de servidor" } };
+    return { status: 500, customer: { message: error.message } };
   }
 };
 
@@ -29,7 +29,7 @@ const insertNewCustomer = async ({ name, phone, cpf, birthday }) => {
     await db.query(`INSERT INTO customers (name,phone,cpf,birthday) VALUES($1,$2,$3,$4);`, [name, phone, cpf, birthday]);
     return { status: 201, message: "Cliente criado com sucesso" };
   } catch (error) {
-    return { status: 500, message: "Erro de servidor" };
+    return { status: 500, message: error.message };
   }
 };
 
@@ -41,7 +41,7 @@ const editCustomer = async (id, { name, phone, cpf, birthday }) => {
       [name, phone, cpf, birthday, id]);
     return ({ status: 200, message: "Cliente atualizado com sucesso" });
   } catch (error) {
-    return { status: 500, message: "Erro de servidor" };
+    return { status: 500, message: error.message };
   }
 };
 
